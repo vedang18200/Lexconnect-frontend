@@ -81,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Invalid user role');
       }
 
+      console.log('[AuthContext] FULL Login response:', response);
+      console.log('[AuthContext] Response keys:', Object.keys(response));
       console.debug('[AuthContext] Login response received:', {
         hasAccessToken: !!response.access_token,
         hasUserId: !!response.user_id,
@@ -91,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response.access_token && response.user_id && response.user_type) {
+        console.log('[AuthContext] Saving token and user data...');
         setAuthToken(response.access_token);
         localStorage.setItem('refreshToken', response.refresh_token);
         localStorage.setItem('userId', response.user_id.toString());
@@ -112,10 +115,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           is_active: true,
           created_at: new Date().toISOString(),
         } as any);
+      } else {
+        console.error('[AuthContext] Response missing required fields:', {
+          has_access_token: !!response.access_token,
+          has_user_id: !!response.user_id,
+          has_user_type: !!response.user_type,
+        });
+        throw new Error('Invalid login response: missing required fields');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);
+      console.error('[AuthContext] Login error:', err);
       throw err;
     } finally {
       setIsLoading(false);
