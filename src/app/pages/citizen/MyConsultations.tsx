@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
-import { Calendar, Users, CheckCircle, Clock, AlertCircle, Loader, User } from "lucide-react";
+import { Calendar, Users, CheckCircle, Clock, AlertCircle, Loader, User, IndianRupee, Briefcase } from "lucide-react";
 import { citizensAPI, consultationsAPI } from "../../services/api";
 import { useCitizenRouteGuard } from "../../hooks/useCitizenRouteGuard";
 

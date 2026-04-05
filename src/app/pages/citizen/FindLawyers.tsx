@@ -4,7 +4,7 @@ import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Search, Star, Briefcase, Calendar, Loader, TrendingUp, Users, Award } from "lucide-react";
+import { Search, Star, Briefcase, Calendar, Loader, TrendingUp, Users, Award, MapPin } from "lucide-react";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar";
 import { lawyersAPI } from "../../services/api";
 import { useCitizenRouteGuard } from "../../hooks/useCitizenRouteGuard";

@@ -1,6 +1,8 @@
 // Quick Reference: Most Common API Calls
 // Import these into your components as needed
 
+import { useEffect, useState } from 'react';
+
 import {
   authAPI,
   usersAPI,
@@ -10,12 +12,12 @@ import {
   messagesAPI,
   citizensAPI,
   socialWorkersAPI
-} from '@/services/api';
+} from './api';
 
 import type {
   UserResponse,
   DirectMessageResponse
-} from '@/services/types';
+} from './types';
 
 /**
  * ============================================
@@ -325,17 +327,15 @@ export const quickUpdateReferralStatus = async (
  * ============================================
  */
 
-import { useEffect, useState } from 'react';
-
 // Hook: Get lawyer with details
 export const useLawyerProfile = (lawyerId: number) => {
-  const [lawyer, setLawyer] = useState(null);
+  const [lawyer, setLawyer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     quickGetLawyerProfile(lawyerId)
-      .then(setLawyer)
+      .then((data: any) => setLawyer(data))
       .catch((err: any) => setError(err instanceof Error ? err.message : 'Failed to load profile'))
       .finally(() => setLoading(false));
   }, [lawyerId]);
@@ -345,14 +345,14 @@ export const useLawyerProfile = (lawyerId: number) => {
 
 // Hook: Get user cases
 export const useUserCases = (userId: number) => {
-  const [cases, setCases] = useState([]);
+  const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     quickGetUserCases(userId)
-      .then(setCases)
-      .catch(setError)
+      .then((data: any) => setCases(Array.isArray(data) ? data : data?.data || []))
+      .catch((err: any) => setError(err instanceof Error ? err.message : 'Failed to load cases'))
       .finally(() => setLoading(false));
   }, [userId]);
 
@@ -363,12 +363,12 @@ export const useUserCases = (userId: number) => {
 export const useCurrentUser = () => {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     quickGetCurrentUser()
-      .then(setUser)
-      .catch(setError)
+      .then((data: any) => setUser(data))
+      .catch((err: any) => setError(err instanceof Error ? err.message : 'Failed to load user'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -379,12 +379,12 @@ export const useCurrentUser = () => {
 export const useConversation = (userId: number) => {
   const [messages, setMessages] = useState<DirectMessageResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     quickGetConversation(userId)
-      .then(setMessages)
-      .catch(setError)
+      .then((data: any) => setMessages(Array.isArray(data) ? data : data?.data || []))
+      .catch((err: any) => setError(err instanceof Error ? err.message : 'Failed to load messages'))
       .finally(() => setLoading(false));
   }, [userId]);
 
@@ -398,89 +398,39 @@ export const useConversation = (userId: number) => {
  *
  * For more comprehensive citizen operations with built-in error handling,
  * create a separate CitizenService class when needed.
- * Commented out for now - uncomment when service is implemented.
+ * Currently commented out - uncomment when service is implemented.
  */
 
-// import { CitizenService, LawyerRegistrationService } from '@/services/citizenService';
-
-/*
-// Lawyer registration with citizen profile creation
-export const quickRegisterLawyer = async (lawyerData: {
-  username: string;
-  email: string;
-  password: string;
-  phone?: string;
-  location?: string;
-  specialization?: string;
-  experience?: number;
-  bio?: string;
-}) => {
-  return LawyerRegistrationService.registerLawyerWithCitizenProfile(lawyerData);
-};
-
-// Ensure lawyer has both profiles
-export const quickEnsureLawyerProfiles = async (userId: number) => {
-  return LawyerRegistrationService.ensureLawyerProfiles(userId);
-};
-
-// Get or create citizen profile
-export const quickGetOrCreateCitizenProfile = async () => {
-  return CitizenService.getOrCreateCitizenProfile();
-};
-
-// Full citizen dashboard with all data
-export const quickGetCitizenDashboardFull = async () => {
-  const [dashboard, stats, cases, consultations, activity] = await Promise.all([
-    CitizenService.getDashboard(),
-    CitizenService.getDashboardStats(),
-    CitizenService.getCasesSummary(),
-    CitizenService.getConsultationsSummary(),
-    CitizenService.getActivitySummary(30)
-  ]);
-  return { dashboard, stats, cases, consultations, activity };
-};
-
-// Upload document with error handling
-export const quickUploadDocumentSafe = async (file: File, caseId?: number) => {
-  try {
-    return await CitizenService.uploadDocument(file, caseId, 'legal_document');
-  } catch (error) {
-    console.error('Document upload failed:', error);
-    throw error;
-  }
-};
-*/
-
 // Create review with validation
-export const quickCreateReviewSafe = async (
-  lawyerId: number,
-  rating: number,
-  reviewText: string
-) => {
-  try {
-    if (rating < 1 || rating > 5) {
-      throw new Error('Rating must be between 1 and 5');
-    }
-    return await CitizenService.createReview({
-      lawyer_id: lawyerId,
-      rating,
-      review_text: reviewText
-    });
-  } catch (error) {
-    console.error('Review creation failed:', error);
-    throw error;
-  }
-};
+// export const quickCreateReviewSafe = async (
+//   lawyerId: number,
+//   rating: number,
+//   reviewText: string
+// ) => {
+//   try {
+//     if (rating < 1 || rating > 5) {
+//       throw new Error('Rating must be between 1 and 5');
+//     }
+//     return await citizensAPI.createReview({
+//       lawyer_id: lawyerId,
+//       rating,
+//       review_text: reviewText
+//     });
+//   } catch (error) {
+//     console.error('Review creation failed:', error);
+//     throw error;
+//   }
+// };
 
 // Set up 2FA
-export const quickSetup2FA = async (authMethod: 'totp' | 'sms' = 'totp') => {
-  try {
-    return await CitizenService.setup2FA(authMethod.toUpperCase());
-  } catch (error) {
-    console.error('2FA setup failed:', error);
-    throw error;
-  }
-};
+// export const quickSetup2FA = async (authMethod: 'totp' | 'sms' = 'totp') => {
+//   try {
+//     return await citizensAPI.setup2FA({ auth_method: authMethod });
+//   } catch (error) {
+//     console.error('2FA setup failed:', error);
+//     throw error;
+//   }
+// };
 
 /**
  * ============================================

@@ -31,8 +31,8 @@ export function MyCases() {
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-ReturnType<typeof setTimeout>
+  const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [_statsError, setStatsError] = useState<string | null>(null);
   const pageSize = 10;
 
   // Load statistics on mount
