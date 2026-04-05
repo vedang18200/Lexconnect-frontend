@@ -18,7 +18,7 @@ export function Login() {
   const handleLogin = async () => {
     setLocalError("");
 
-    if (!username || !password) {
+    if (!username.trim() || !password.trim()) {
       setLocalError("Please enter your credentials");
       return;
     }
@@ -29,7 +29,7 @@ export function Login() {
     }
 
     try {
-      await login(username, password, selectedRole);
+      await login(username.trim(), password.trim(), selectedRole);
 
       // Navigate based on role
       if (selectedRole === 'citizen') {

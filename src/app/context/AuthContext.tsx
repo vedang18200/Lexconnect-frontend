@@ -68,15 +68,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     setError(null);
     try {
+      // Trim whitespace from inputs
+      const trimmedUsername = username.trim();
+      const trimmedPassword = password.trim();
+
+      console.log('[AuthContext] Login attempt with:', {
+        username: trimmedUsername,
+        role: userRole,
+      });
+
       let response;
 
       // Call role-specific login endpoint
       if (userRole === 'citizen') {
-        response = await authAPI.loginAsCitizen(username, password) as any;
+        response = await authAPI.loginAsCitizen(trimmedUsername, trimmedPassword) as any;
       } else if (userRole === 'lawyer') {
-        response = await authAPI.loginAsLawyer(username, password) as any;
+        response = await authAPI.loginAsLawyer(trimmedUsername, trimmedPassword) as any;
       } else if (userRole === 'social-worker') {
-        response = await authAPI.loginAsSocialWorker(username, password) as any;
+        response = await authAPI.loginAsSocialWorker(trimmedUsername, trimmedPassword) as any;
       } else {
         throw new Error('Invalid user role');
       }
@@ -98,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('refreshToken', response.refresh_token);
         localStorage.setItem('userId', response.user_id.toString());
         localStorage.setItem('userType', response.user_type);
-        localStorage.setItem('username', username);
+        localStorage.setItem('username', trimmedUsername);
         localStorage.setItem('createdAt', new Date().toISOString());
 
         console.debug('[AuthContext] Token stored in authToken. Verifying...', {
@@ -108,8 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Set user object with response data
         setUser({
           id: response.user_id,
-          username: username,
-          email: username,
+          username: trimmedUsername,
+          email: trimmedUsername,
           user_type: response.user_type,
           user_id: response.user_id,
           is_active: true,
