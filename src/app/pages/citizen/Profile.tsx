@@ -7,7 +7,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { Loader, Check, AlertCircle, Briefcase } from "lucide-react";
+import { Loader, Check, AlertCircle } from "lucide-react";
 import { citizensAPI } from "../../services/api";
 import { useCitizenRouteGuard } from "../../hooks/useCitizenRouteGuard";
 import type { CitizenProfileResponse } from "../../services/types";

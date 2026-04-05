@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Input } from "../../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Briefcase, BarChart3, AlertCircle, CheckCircle, Clock, Loader, Search, User, FileText, TrendingUp, Calendar } from "lucide-react";
+import { Briefcase, AlertCircle, CheckCircle, Clock, Loader, Search, User, TrendingUp, Calendar } from "lucide-react";
 import { citizensAPI } from "../../services/api";
 import { useCitizenRouteGuard } from "../../hooks/useCitizenRouteGuard";
 import type { MyCasesResponse, MyCasesListResponse, CaseStatistics } from "../../services/types";
@@ -19,7 +19,6 @@ export function MyCases() {
   // Statistics State
   const [statistics, setStatistics] = useState<CaseStatistics | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [statsError, setStatsError] = useState<string | null>(null);
 
   // Cases List State
   const [cases, setCases] = useState<MyCasesResponse[]>([]);
@@ -33,7 +32,7 @@ export function MyCases() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-
+ReturnType<typeof setTimeout>
   const pageSize = 10;
 
   // Load statistics on mount

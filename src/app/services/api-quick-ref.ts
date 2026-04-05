@@ -14,9 +14,6 @@ import {
 
 import type {
   UserResponse,
-  LawyerResponse,
-  CaseResponse,
-  ConsultationResponse,
   DirectMessageResponse
 } from '@/services/types';
 
@@ -96,7 +93,7 @@ export const quickGetLawyerProfile = async (lawyerId: number) => {
 };
 
 // Get lawyer's availability
-export const quickGetLawyerAvailability = async (lawyerId: number) => {
+export const quickGetLawyerAvailability = async () => {
   return lawyersAPI.getAllAvailability();
 };
 
@@ -339,7 +336,7 @@ export const useLawyerProfile = (lawyerId: number) => {
   useEffect(() => {
     quickGetLawyerProfile(lawyerId)
       .then(setLawyer)
-      .catch(setError)
+      .catch((err: any) => setError(err instanceof Error ? err.message : 'Failed to load profile'))
       .finally(() => setLoading(false));
   }, [lawyerId]);
 
@@ -400,11 +397,13 @@ export const useConversation = (userId: number) => {
  * ============================================
  *
  * For more comprehensive citizen operations with built-in error handling,
- * use the CitizenService class instead of the quick functions above.
+ * create a separate CitizenService class when needed.
+ * Commented out for now - uncomment when service is implemented.
  */
 
-import { CitizenService, LawyerRegistrationService } from '@/services/citizenService';
+// import { CitizenService, LawyerRegistrationService } from '@/services/citizenService';
 
+/*
 // Lawyer registration with citizen profile creation
 export const quickRegisterLawyer = async (lawyerData: {
   username: string;
@@ -450,6 +449,7 @@ export const quickUploadDocumentSafe = async (file: File, caseId?: number) => {
     throw error;
   }
 };
+*/
 
 // Create review with validation
 export const quickCreateReviewSafe = async (
