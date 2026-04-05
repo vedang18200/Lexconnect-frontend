@@ -1,22 +1,39 @@
 import { useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import type { UserResponse } from "../services/types";
 import { Scale, LayoutDashboard, User, Calendar, Briefcase, Search, MessageSquare, CreditCard, Users, UserPlus, FolderOpen, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
-export function RootLayout() {
+interface RootLayoutProps {
+  user: (UserResponse & { user_id: number; user_type: 'citizen' | 'lawyer' | 'social-worker' }) | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  logout: () => void;
+}
+
+export function RootLayout({ user, isAuthenticated, isLoading, logout }: RootLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Wait for auth check to complete before redirecting
+    if (!isLoading && !isAuthenticated) {
       navigate('/login');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
 
-  if (!user) return null;
+  // Show loading state while checking authentication
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const userRole = user.user_type;
   const displayName = user.username || user.email || 'User';

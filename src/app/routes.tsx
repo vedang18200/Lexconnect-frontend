@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router";
-import { RootLayout } from "./components/RootLayout";
+import { RootLayoutWrapper } from "./components/RootLayoutWrapper";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Registration";
 import { NotFound } from "./pages/NotFound";
@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
-    Component: RootLayout,
+    Component: RootLayoutWrapper,
     children: [
       // Citizen routes
       { index: true, Component: CitizenDashboard },

@@ -96,13 +96,79 @@ export interface LawyerResponse {
   location?: string;
   bio?: string;
   fee_range?: string;
-  languages?: string;
+  fee_per_hour?: number;
+  languages?: string | string[];
   rating?: number;
+  review_count?: number;
   verified: boolean;
   total_cases: number;
   total_clients: number;
+  availability?: string;
+  response_time?: string;
+  specializations?: string[];
+  cases_won?: number;
+  success_rate?: number;
+  effective_rating?: number;
+  available_via?: string[];
+  next_slot_available?: string;
+  top_achievement?: string;
   created_at: string;
   updated_at?: string;
+}
+
+export interface ReviewData {
+  id: number;
+  rating: number;
+  title: string;
+  review_text: string;
+  communication_rating?: number;
+  professionalism_rating?: number;
+  effectiveness_rating?: number;
+  citizen_name: string;
+  created_at: string;
+  is_verified_client?: boolean;
+}
+
+export interface ReviewsSummary {
+  total_reviews: number;
+  average_rating: number;
+  effective_rating: number;
+  rating_distribution: {
+    [key: string]: number;
+  };
+}
+
+export interface AchievementData {
+  title: string;
+  year: string;
+  issuer: string;
+}
+
+export interface OverviewData {
+  bio?: string;
+  experience?: number;
+  availability?: string;
+  specializations?: string[];
+  languages?: string[];
+  education?: string[];
+  credentials?: string;
+  bar_council_id?: string;
+  rating?: number;
+  review_count?: number;
+  cases_won?: number;
+  success_rate?: number;
+  clients_satisfied?: number;
+}
+
+export interface LawyerProfileResponse extends LawyerResponse {
+  clients_satisfied?: number;
+  bar_council_id?: string;
+  credentials?: string;
+  education?: string[];
+  reviews_summary?: ReviewsSummary;
+  overview_data?: OverviewData;
+  reviews_data?: ReviewData[];
+  achievements_data?: AchievementData[];
 }
 
 export interface LawyerCredentialCreate {
@@ -215,6 +281,56 @@ export interface CaseNoteResponse {
   completed_at?: string;
   created_at: string;
   updated_at?: string;
+}
+
+// My Cases - Lawyer Info
+export interface CaseLawyerInfo {
+  id: number;
+  user_id: number;
+  name: string;
+  email: string;
+  phone: string;
+  specialization: string;
+}
+
+// My Cases - Detailed Case
+export interface MyCasesResponse {
+  id: number;
+  user_id: number;
+  lawyer_id: number;
+  title: string;
+  description: string;
+  category: string;
+  status: 'open' | 'in_progress' | 'active' | 'pending' | 'closed' | 'resolved';
+  priority: 'low' | 'medium' | 'high' | null;
+  case_number: string;
+  created_at: string;
+  updated_at: string;
+  lawyer: CaseLawyerInfo;
+  court_name?: string;
+  hearing_date?: string | null;
+  estimated_completion_date?: string | null;
+  case_progress?: number;
+  documents_count: number;
+  updates_count: number;
+  legal_fees_amount: number;
+  legal_fees_paid: number;
+}
+
+// My Cases - List Response
+export interface MyCasesListResponse {
+  total: number;
+  page: number;
+  cases: MyCasesResponse[];
+}
+
+// My Cases - Statistics
+export interface CaseStatistics {
+  total_cases: number;
+  active_cases: number;
+  pending_cases: number;
+  closed_cases: number;
+  resolved_cases: number;
 }
 
 // ============================================

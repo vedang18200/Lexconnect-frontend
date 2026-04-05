@@ -37,7 +37,7 @@ type RecentMessage = {
 
 export function CitizenDashboard() {
   // Protect route - only citizens can access
-  const isAuthorized = useCitizenRouteGuard();
+  useCitizenRouteGuard();
 
   const [statsData, setStatsData] = useState<DashboardStats | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
@@ -53,11 +53,6 @@ export function CitizenDashboard() {
   const [cases, setCases] = useState<CitizenCaseSummary[]>([]);
   const [casesLoading, setCasesLoading] = useState(true);
   const [casesError, setCasesError] = useState<string | null>(null);
-
-  // Return null while checking authorization
-  if (!isAuthorized) {
-    return null;
-  }
 
   const [recentMessages, setRecentMessages] = useState<RecentMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(true);

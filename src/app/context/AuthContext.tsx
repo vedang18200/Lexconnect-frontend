@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, type ReactNode, useCallback, useEffect } from 'react';
 import { authAPI, setAuthToken, clearAuthToken } from '../services/api';
 import type { UserResponse } from '../services/types';
 
@@ -24,12 +24,45 @@ interface AuthContextType {
   error: string | null;
 }
 
+// Create context with a default value of undefined to detect if useAuth is used outside AuthProvider
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Restore authentication state from localStorage on mount
+  useEffect(() => {
+    const authToken = localStorage.getItem('authToken');
+    const userId = localStorage.getItem('userId');
+    const userType = localStorage.getItem('userType');
+    const username = localStorage.getItem('username');
+
+    console.debug('[AuthContext] Restoring from localStorage:', {
+      hasToken: !!authToken,
+      hasUserId: !!userId,
+      hasUserType: !!userType,
+      hasUsername: !!username,
+      authToken: authToken ? `${authToken.substring(0, 20)}...` : 'none',
+    });
+
+    if (authToken && userId && userType && username) {
+      // Restore both the token and user state
+      setAuthToken(authToken);
+      setUser({
+        id: parseInt(userId),
+        username: username,
+        email: username,
+        user_type: userType as UserRole,
+        user_id: parseInt(userId),
+        is_active: true,
+        created_at: localStorage.getItem('createdAt') || new Date().toISOString(),
+      } as any);
+      console.debug('[AuthContext] Session restored for user:', username);
+    }
+    setIsLoading(false);
+  }, []);
 
   const login = useCallback(async (username: string, password: string, userRole: 'citizen' | 'lawyer' | 'social-worker') => {
     setIsLoading(true);
@@ -48,11 +81,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Invalid user role');
       }
 
+      console.debug('[AuthContext] Login response received:', {
+        hasAccessToken: !!response.access_token,
+        hasUserId: !!response.user_id,
+        hasUserType: !!response.user_type,
+        accessToken: response.access_token ? `${response.access_token.substring(0, 20)}...` : 'none',
+        userId: response.user_id,
+        userType: response.user_type,
+      });
+
       if (response.access_token && response.user_id && response.user_type) {
         setAuthToken(response.access_token);
         localStorage.setItem('refreshToken', response.refresh_token);
         localStorage.setItem('userId', response.user_id.toString());
         localStorage.setItem('userType', response.user_type);
+        localStorage.setItem('username', username);
+        localStorage.setItem('createdAt', new Date().toISOString());
+
+        console.debug('[AuthContext] Token stored in authToken. Verifying...', {
+          storedToken: localStorage.getItem('authToken') ? `${localStorage.getItem('authToken')!.substring(0, 20)}...` : 'none',
+        });
 
         // Set user object with response data
         setUser({
@@ -91,6 +139,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     clearAuthToken();
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('username');
+    localStorage.removeItem('createdAt');
     setUser(null);
     setError(null);
   }, []);

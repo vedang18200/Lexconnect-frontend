@@ -5,7 +5,7 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1';
 
 // Get auth token from localStorage
-const getAuthToken = () => {
+export const getAuthToken = () => {
   return localStorage.getItem('authToken');
 };
 
@@ -21,6 +21,9 @@ async function request<T>(
   const token = getAuthToken();
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
+    console.debug(`[API] Sending request with auth token to ${endpoint}`);
+  } else {
+    console.warn(`[API] No auth token found for ${endpoint}`);
   }
 
   headers.set('Content-Type', 'application/json');
@@ -31,6 +34,33 @@ async function request<T>(
   });
 
   if (!response.ok) {
+    // Handle 401 Unauthorized - clear stored auth and redirect to login
+    if (response.status === 401) {
+      try {
+        const errorBody = await response.json().catch(() => ({}));
+        console.error(`[API] 401 Unauthorized on ${endpoint}`, {
+          url: url,
+          endpoint: endpoint,
+          authTokenSent: !!token,
+          tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
+          responseBody: errorBody,
+          headers: Object.fromEntries(response.headers.entries()),
+        });
+      } catch (e) {
+        console.error(`[API] 401 Unauthorized on ${endpoint} - cannot parse error body`);
+      }
+
+      clearAuthToken();
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userType');
+      localStorage.removeItem('username');
+      localStorage.removeItem('createdAt');
+      // Redirect to login page
+      window.location.href = '/login';
+      throw new Error('Session expired. Please login again.');
+    }
+
     const error = await response.json().catch(() => ({ message: 'Unknown error' }));
     throw new Error(error.message || `API Error: ${response.status}`);
   }
@@ -180,6 +210,34 @@ export const lawyersAPI = {
 
   getLawyerDetails: (lawyerId: number) =>
     request(`/lawyers/${lawyerId}/details`),
+
+  // Find lawyers for public listing/search
+  findLawyers: (params: {
+    query?: string;
+    specialization?: string;
+    min_price?: number;
+    max_price?: number;
+    location?: string;
+    min_rating?: number;
+    verified_only?: boolean;
+    skip?: number;
+    limit?: number;
+  }) => {
+    const queryString = new URLSearchParams(
+      Object.entries(params)
+        .filter(([, v]) => v !== undefined && v !== null)
+        .map(([k, v]) => [k, String(v)])
+    ).toString();
+    return request(`/find-lawyers?${queryString}`);
+  },
+
+  // Get single lawyer card with all details
+  getLawyerCard: (lawyerId: number) =>
+    request(`/lawyers/${lawyerId}/card`),
+
+  // Get detailed lawyer profile for View Full Profile modal/page
+  getLawyerProfile: (lawyerId: number) =>
+    request(`/lawyers/${lawyerId}/profile`),
 
   getUserLawyer: (userId: number) => request(`/users/${userId}/lawyer`),
 
@@ -551,6 +609,27 @@ export const citizensAPI = {
     request(`/citizens/payments/${paymentId}/refund`, {
       method: 'POST',
     }),
+
+  // Cases
+  getCaseStatistics: () =>
+    request('/cases/my-cases/statistics'),
+
+  getMyCases: (filters: {
+    status_filter?: string;
+    priority_filter?: string;
+    search?: string;
+    skip?: number;
+    limit?: number;
+  } = {}) => {
+    const params = new URLSearchParams();
+    if (filters.status_filter) params.append('status_filter', filters.status_filter);
+    if (filters.priority_filter) params.append('priority_filter', filters.priority_filter);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.skip !== undefined) params.append('skip', filters.skip.toString());
+    if (filters.limit !== undefined) params.append('limit', filters.limit.toString());
+
+    return request(`/cases/my-cases${params.toString() ? `?${params}` : ''}`);
+  },
 
   // Dashboard
   getDashboard: () => request('/citizens/dashboard'),
