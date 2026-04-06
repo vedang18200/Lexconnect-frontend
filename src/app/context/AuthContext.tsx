@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode, useCallback, useEffect } from 'react';
-import { authAPI, setAuthToken, clearAuthToken } from '../services/api';
+import { authAPI, setAuthToken, clearAuthToken, usersAPI } from '../services/api';
 import type { UserResponse } from '../services/types';
 
 type UserRole = 'citizen' | 'lawyer' | 'social-worker';
@@ -38,12 +38,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userId = localStorage.getItem('userId');
     const userType = localStorage.getItem('userType');
     const username = localStorage.getItem('username');
+    const userEmail = localStorage.getItem('userEmail');
 
     console.debug('[AuthContext] Restoring from localStorage:', {
       hasToken: !!authToken,
       hasUserId: !!userId,
       hasUserType: !!userType,
       hasUsername: !!username,
+      hasUserEmail: !!userEmail,
       authToken: authToken ? `${authToken.substring(0, 20)}...` : 'none',
     });
 
@@ -53,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser({
         id: parseInt(userId),
         username: username,
-        email: username,
+        email: userEmail || username,
         user_type: userType as UserRole,
         user_id: parseInt(userId),
         is_active: true,
@@ -105,9 +107,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('[AuthContext] Saving token and user data...');
         setAuthToken(response.access_token);
         localStorage.setItem('refreshToken', response.refresh_token);
+
+        let resolvedUsername =
+          typeof response.username === 'string' && response.username.trim()
+            ? response.username.trim()
+            : '';
+        let resolvedEmail =
+          typeof response.email === 'string' && response.email.trim()
+            ? response.email.trim()
+            : '';
+
+        // If login response does not include user profile fields, fetch current user.
+        if (!resolvedUsername || !resolvedEmail || resolvedUsername === resolvedEmail) {
+          try {
+            const currentUser = await usersAPI.getCurrentUser() as UserResponse;
+            if (currentUser?.username?.trim()) {
+              resolvedUsername = currentUser.username.trim();
+            }
+            if (currentUser?.email?.trim()) {
+              resolvedEmail = currentUser.email.trim();
+            }
+          } catch (profileError) {
+            console.warn('[AuthContext] Unable to fetch current user after login:', profileError);
+          }
+        }
+
+        if (!resolvedUsername) {
+          resolvedUsername = trimmedUsername.includes('@')
+            ? trimmedUsername.split('@')[0]
+            : trimmedUsername;
+        }
+
+        if (!resolvedEmail) {
+          resolvedEmail = trimmedUsername.includes('@') ? trimmedUsername : resolvedUsername;
+        }
+
         localStorage.setItem('userId', response.user_id.toString());
         localStorage.setItem('userType', response.user_type);
-        localStorage.setItem('username', trimmedUsername);
+        localStorage.setItem('username', resolvedUsername);
+        localStorage.setItem('userEmail', resolvedEmail);
         localStorage.setItem('createdAt', new Date().toISOString());
 
         console.debug('[AuthContext] Token stored in authToken. Verifying...', {
@@ -117,8 +155,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Set user object with response data
         setUser({
           id: response.user_id,
-          username: trimmedUsername,
-          email: trimmedUsername,
+          username: resolvedUsername,
+          email: resolvedEmail,
           user_type: response.user_type,
           user_id: response.user_id,
           is_active: true,
@@ -162,6 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('userId');
     localStorage.removeItem('userType');
     localStorage.removeItem('username');
+    localStorage.removeItem('userEmail');
     localStorage.removeItem('createdAt');
     setUser(null);
     setError(null);

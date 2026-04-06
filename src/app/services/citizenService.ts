@@ -290,9 +290,15 @@ export class CitizenService {
   /**
    * Get consultations summary
    */
-  static async getConsultationsSummary() {
+  static async getConsultationsSummary(params: {
+    status?: string;
+    mode?: string;
+    q?: string;
+    skip?: number;
+    limit?: number;
+  } = {}) {
     try {
-      return await citizensAPI.getConsultationsSummary();
+      return await citizensAPI.getConsultationsSummary(params);
     } catch (error) {
       throw new Error(`Failed to fetch consultations summary: ${error}`);
     }

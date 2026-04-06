@@ -1,4 +1,5 @@
 import type { UserResponse, TwoFactorAuthResponse } from './types';
+import type { ConsultationDetailResponse } from './types/citizenConsultations';
 
 // API Configuration and base client
 const API_BASE_URL =
@@ -81,6 +82,7 @@ async function request<T>(
       localStorage.removeItem('userId');
       localStorage.removeItem('userType');
       localStorage.removeItem('username');
+      localStorage.removeItem('userEmail');
       localStorage.removeItem('createdAt');
       // Redirect to login page
       window.location.href = '/login';
@@ -660,8 +662,24 @@ export const citizensAPI = {
   getDashboard: () => request('/citizens/dashboard'),
   getDashboardStats: () => request('/citizens/dashboard/stats'),
   getCasesSummary: () => request('/citizens/dashboard/cases-summary'),
-  getConsultationsSummary: () =>
-    request('/citizens/dashboard/consultations-summary'),
+  getConsultationsSummary: (params: {
+    status?: string;
+    mode?: string;
+    q?: string;
+    skip?: number;
+    limit?: number;
+  } = {}) => {
+    const query = new URLSearchParams();
+    if (params.status && params.status !== 'all') query.append('status', params.status);
+    if (params.mode && params.mode !== 'all') query.append('mode', params.mode);
+    if (params.q) query.append('q', params.q);
+    if (params.skip !== undefined) query.append('skip', String(params.skip));
+    if (params.limit !== undefined) query.append('limit', String(params.limit));
+
+    return request(`/citizens/dashboard/consultations-summary${query.toString() ? `?${query.toString()}` : ''}`);
+  },
+  getConsultationDetails: (consultationId: number) =>
+    request<ConsultationDetailResponse>(`/citizens/dashboard/consultations/${consultationId}/details`),
   getActivitySummary: (days: number = 30) =>
     request(`/citizens/dashboard/activity?days=${days}`),
 };
