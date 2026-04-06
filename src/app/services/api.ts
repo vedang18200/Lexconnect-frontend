@@ -4,6 +4,18 @@ import type { UserResponse, TwoFactorAuthResponse } from './types';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1';
 
+const PUBLIC_AUTH_ENDPOINTS = new Set([
+  '/auth/login',
+  '/auth/login/citizen',
+  '/auth/login/lawyer',
+  '/auth/login/social-worker',
+  '/auth/register',
+]);
+
+const isPublicAuthEndpoint = (endpoint: string) => {
+  return PUBLIC_AUTH_ENDPOINTS.has(endpoint);
+};
+
 // Get auth token from localStorage
 export const getAuthToken = () => {
   return localStorage.getItem('authToken');
@@ -23,7 +35,11 @@ async function request<T>(
     headers.set('Authorization', `Bearer ${token}`);
     console.debug(`[API] Sending request with auth token to ${endpoint}`);
   } else {
-    console.warn(`[API] No auth token found for ${endpoint}`);
+    if (isPublicAuthEndpoint(endpoint)) {
+      console.debug(`[API] Public auth request without token for ${endpoint}`);
+    } else {
+      console.warn(`[API] No auth token found for ${endpoint}`);
+    }
   }
 
   headers.set('Content-Type', 'application/json');
@@ -34,10 +50,15 @@ async function request<T>(
   });
 
   if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({} as Record<string, unknown>));
+    const errorMessage =
+      (typeof errorBody.message === 'string' && errorBody.message) ||
+      (typeof errorBody.detail === 'string' && errorBody.detail) ||
+      `API Error: ${response.status}`;
+
     // Handle 401 Unauthorized - clear stored auth and redirect to login
     if (response.status === 401) {
       try {
-        const errorBody = await response.json().catch(() => ({}));
         console.error(`[API] 401 Unauthorized on ${endpoint}`, {
           url: url,
           endpoint: endpoint,
@@ -48,6 +69,11 @@ async function request<T>(
         });
       } catch (e) {
         console.error(`[API] 401 Unauthorized on ${endpoint} - cannot parse error body`);
+      }
+
+      if (isPublicAuthEndpoint(endpoint)) {
+        // Login/registration failures are expected auth errors, not expired sessions.
+        throw new Error(errorMessage);
       }
 
       clearAuthToken();
@@ -61,8 +87,7 @@ async function request<T>(
       throw new Error('Session expired. Please login again.');
     }
 
-    const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-    throw new Error(error.message || `API Error: ${response.status}`);
+    throw new Error(errorMessage);
   }
 
   return response.json();
