@@ -8,9 +8,9 @@ import { Label } from "../components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Textarea } from "../components/ui/textarea";
-import { Scale, User, Briefcase, Users, ArrowLeft } from "lucide-react";
+import { Scale, User, Briefcase, ArrowLeft } from "lucide-react";
 
-type Role = "citizen" | "lawyer" | "social-worker";
+type Role = "citizen" | "lawyer";
 
 export function Register() {
   const navigate = useNavigate();
@@ -35,11 +35,6 @@ export function Register() {
   const [qualification, setQualification] = useState("");
   const [bio, setBio] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
-
-  // Social Worker specific
-  const [agencyName, setAgencyName] = useState("");
-  const [agencyId, setAgencyId] = useState("");
-  const [designation, setDesignation] = useState("");
 
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [localError, setLocalError] = useState("");
@@ -117,7 +112,7 @@ export function Register() {
         )}
 
         <Tabs defaultValue="citizen" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="citizen" className="gap-2">
               <User className="w-4 h-4" />
               Citizen
@@ -125,10 +120,6 @@ export function Register() {
             <TabsTrigger value="lawyer" className="gap-2">
               <Briefcase className="w-4 h-4" />
               Lawyer
-            </TabsTrigger>
-            <TabsTrigger value="social-worker" className="gap-2">
-              <Users className="w-4 h-4" />
-              Social Worker
             </TabsTrigger>
           </TabsList>
 
@@ -324,83 +315,6 @@ export function Register() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="social-worker">
-            <Card>
-              <CardHeader>
-                <CardTitle>Social Worker Registration</CardTitle>
-                <CardDescription>Register to help connect clients with legal services</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="sw-name">Full Name *</Label>
-                    <Input id="sw-name" placeholder="Meera Singh" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sw-email">Email *</Label>
-                    <Input id="sw-email" type="email" placeholder="meera@example.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="sw-phone">Phone Number *</Label>
-                    <Input id="sw-phone" type="tel" placeholder="7756882618" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sw-designation">Designation *</Label>
-                    <Input id="sw-designation" placeholder="Senior Social Worker" value={designation} onChange={(e) => setDesignation(e.target.value)} required />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="sw-agency">Agency Name *</Label>
-                    <Input id="sw-agency" placeholder="Legal Aid Society" value={agencyName} onChange={(e) => setAgencyName(e.target.value)} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sw-agency-id">Agency ID *</Label>
-                    <Input id="sw-agency-id" placeholder="AG/2024/001" value={agencyId} onChange={(e) => setAgencyId(e.target.value)} required />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="sw-address">Office Address *</Label>
-                  <Textarea id="sw-address" placeholder="Enter your office address" value={address} onChange={(e) => setAddress(e.target.value)} rows={2} required />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="sw-password">Password *</Label>
-                    <Input id="sw-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sw-confirm-password">Confirm Password *</Label>
-                    <Input id="sw-confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" required />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <input
-                    id="sw-terms"
-                    type="checkbox"
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                  <label htmlFor="sw-terms" className="text-sm text-gray-700 cursor-pointer">
-                    I accept the terms and conditions and verify my agency affiliation
-                  </label>
-                </div>
-
-                <Button className="w-full" disabled={isLoading} onClick={() => handleRegister("social-worker")}>Create Social Worker Account</Button>
-
-                <p className="text-xs text-gray-500 text-center">
-                  Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Login here</Link>
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>

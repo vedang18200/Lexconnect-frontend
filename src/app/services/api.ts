@@ -170,6 +170,12 @@ export const usersAPI = {
 
   getLawyers: (skip: number = 0, limit: number = 10) =>
     request(`/users/list/lawyers?skip=${skip}&limit=${limit}`),
+
+  changePassword: (data: { current_password: string; new_password: string }) =>
+    request('/users/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 // ============================================
@@ -471,6 +477,9 @@ export const messagesAPI = {
   getConversations: () =>
     request('/messages/conversations'),
 
+  getConversationDetails: (otherUserId: number) =>
+    request(`/messages/conversation/${otherUserId}`),
+
   // Direct messages
   sendMessage: (receiverId: number, message: string) =>
     request('/messages/direct', {
@@ -486,12 +495,22 @@ export const messagesAPI = {
       method: 'PUT',
     }),
 
+  markConversationRead: (otherUserId: number) =>
+    request(`/messages/conversation/${otherUserId}/read`, {
+      method: 'PUT',
+    }),
+
   // Chat with AI
   createChatMessage: (message: string, language: string = 'en') =>
     request('/chat', {
       method: 'POST',
       body: JSON.stringify({ message, language }),
     }),
+
+  getQuickQuestions: () => request('/chat/quick-questions'),
+
+  getChatSuggestions: (context: string) =>
+    request(`/chat/suggestions?context=${encodeURIComponent(context)}`),
 
   getChatHistory: (skip: number = 0, limit: number = 10) =>
     request(`/chat/history?skip=${skip}&limit=${limit}`),
@@ -579,6 +598,39 @@ export const citizensAPI = {
     request(`/citizens/documents/${documentId}`, {
       method: 'DELETE',
     }),
+
+  getNotificationPreferences: () =>
+    request('/citizens/notification-preferences'),
+
+  updateNotificationPreferences: (data: {
+    email_notifications: boolean;
+    sms_notifications: boolean;
+    case_updates: boolean;
+    consultation_reminders: boolean;
+    payment_alerts: boolean;
+    marketing_emails: boolean;
+  }) =>
+    request('/citizens/notification-preferences', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  getBillingHistory: (params: {
+    skip?: number;
+    limit?: number;
+    status?: string;
+    from_date?: string;
+    to_date?: string;
+  } = {}) => {
+    const query = new URLSearchParams();
+    if (params.skip !== undefined) query.append('skip', String(params.skip));
+    if (params.limit !== undefined) query.append('limit', String(params.limit));
+    if (params.status) query.append('status', params.status);
+    if (params.from_date) query.append('from_date', params.from_date);
+    if (params.to_date) query.append('to_date', params.to_date);
+
+    return request(`/citizens/billing-history${query.toString() ? `?${query.toString()}` : ''}`);
+  },
 
   // Reviews
   createReview: (data: any) =>

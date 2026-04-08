@@ -412,6 +412,10 @@ export interface CitizenProfileUpdate {
   state?: string;
   pincode?: string;
   bio?: string;
+  occupation?: string;
+  email?: string;
+  phone?: string;
+  aadhar_number?: string;
   profile_picture_url?: string;
 }
 
@@ -426,11 +430,46 @@ export interface CitizenProfileResponse {
   state?: string;
   pincode?: string;
   bio?: string;
+  occupation?: string;
+  email?: string;
+  phone?: string;
+  aadhar_number_masked?: string;
   profile_picture_url?: string;
   is_kyc_verified: boolean;
   kyc_verified_at?: string;
   created_at: string;
   updated_at?: string;
+}
+
+export interface NotificationPreferencesResponse {
+  email_notifications: boolean;
+  sms_notifications: boolean;
+  case_updates: boolean;
+  consultation_reminders: boolean;
+  payment_alerts: boolean;
+  marketing_emails: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface BillingHistoryItemResponse {
+  id: number;
+  title: string;
+  date: string;
+  payment_method: string;
+  transaction_id: string;
+  amount: number;
+  currency?: string;
+  status: string;
+}
+
+export interface BillingHistoryResponse {
+  items: BillingHistoryItemResponse[];
+  total: number;
+  summary?: {
+    total_spent: number;
+    currency?: string;
+  };
 }
 
 export interface DocumentUploadResponse {

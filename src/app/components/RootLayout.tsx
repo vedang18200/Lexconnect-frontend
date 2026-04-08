@@ -4,6 +4,7 @@ import type { UserResponse } from "../services/types";
 import { Scale, LayoutDashboard, User, Calendar, Briefcase, Search, MessageSquare, CreditCard, Users, UserPlus, FolderOpen, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { CitizenAIAssistant } from "./CitizenAIAssistant";
 
 interface RootLayoutProps {
   user: (UserResponse & { user_id: number; user_type: 'citizen' | 'lawyer' | 'social-worker' }) | null;
@@ -159,6 +160,8 @@ export function RootLayout({ user, isAuthenticated, isLoading, logout }: RootLay
           <Outlet />
         </main>
       </div>
+
+      {userRole === "citizen" && <CitizenAIAssistant />}
     </div>
   );
 }
